@@ -1,0 +1,72 @@
+version: "3.8"
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - cafe-network
+
+  menu-service:
+    build: ./menu-services
+    ports:
+      - "3001:3001"
+    networks:
+      - cafe-network
+    depends_on:
+      - mongo
+
+  order-service:
+    build: ./order-services
+    ports:
+      - "3002:3002"
+    networks:
+      - cafe-network
+    depends_on:
+      - menu-service
+      - customer-service
+      - inventory-service
+
+  payment-service:
+    build: ./payment-services
+    ports:
+      - "3003:3003"
+    networks:
+      - cafe-network
+    depends_on:
+      - order-service
+
+  inventory-service:
+    build: ./inventory-services
+    ports:
+      - "3004:3004"
+    networks:
+      - cafe-network
+    depends_on:
+      - mongo
+
+  customer-service:
+    build: ./customer-services
+    ports:
+      - "3005:3005"
+    networks:
+      - cafe-network
+    depends_on:
+      - mongo
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    networks:
+      - cafe-network
+    depends_on:
+      - menu-service
+      - order-service
+      - payment-service
+      - customer-service
+      - inventory-service
+
+networks:
+  cafe-network:
+    driver: bridge
